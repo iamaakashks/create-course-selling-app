@@ -1,4 +1,6 @@
 import {userModel} from '../model/user.model.js'
+import jwt from 'jsonwebtoken'
+import bcrypt from 'bcryptjs';
 
 export const registerUser = async (req, res)=>{
     try{
@@ -14,6 +16,19 @@ export const registerUser = async (req, res)=>{
         res.sendStatus(500);
     }
 }
-export const loginUser = (req, res)=>{
-
+export const loginUser = async (req, res)=>{
+    try{
+        const {body: {email, password}} = req;
+        const findUser = await userModel.findOne({email});
+        if(!findUser) return res.status(404).send({msg: "User Not Found, Try Signup"});
+        if(!(await bcrypt.compare(password, findUser.password))) return res.status(401).send({msg: "password doesnot match"});
+        const token = jwt.sign({id: findUser._id}, process.env.JWT_SECRET_USER, {expiresIn: '1h'});
+        res.cookie('token', token, {
+            maxAge: 1000*60*60*1,
+            httpOnly: true
+        })
+        return res.status(200).send({msg: "Logged in"});
+    }catch(err){
+        res.sendStatus(500);
+    }
 }
