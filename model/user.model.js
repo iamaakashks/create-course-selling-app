@@ -1,4 +1,5 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -20,4 +21,4 @@ userSchema.pre('save', async function(next){
     this.password = await bcrypt.hash(this.password, salt);
     next();
 })
-export const userModel = mongoose.model('user', userSchema);
+export const userModel = mongoose.model('userInfo', userSchema);
